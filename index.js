@@ -14,32 +14,78 @@ app.get("/random", (req, res) => {
 });
 
 //2. GET a specific joke
-app.get("/joke/:id", (req, res) => {
-  let id = Number(req.params.id); 
+app.get("/jokes/:id", (req, res) => {
+  let id = Number(req.params.id);
   return res.json(jokes.find((joke) => joke.id === id));
 });
 
 //3. GET a jokes by filtering on the joke type
 
 app.get("/filter", (req, res) => {
-  if (req.query.type){
-let jokeType = req.query.type;
-  let result = jokes.filter((joke) => joke.jokeType === jokeType);
-  return res.json(result);
+  if (req.query.type) {
+    let jokeType = req.query.type;
+    let result = jokes.filter((joke) => joke.jokeType === jokeType);
+    return res.json(result);
   }
-  return res.json({errorMessage: "You didn`t specify the joke type!"});
-  
+  return res.json({ errorMessage: "You didn`t specify the joke type!" });
 });
 
 //4. POST a new joke
+app.post("/jokes", (req, res) => {
+  let id = jokes[jokes.length - 1].id + 1;
+  jokes.push({
+    id: id,
+    jokeText: req.body.text,
+    jokeType: req.body.type,
+  });
+
+  return res.json(jokes[jokes.length - 1]);
+});
 
 //5. PUT a joke
+app.put("/jokes/:id", (req, res) => {
+  let id = Number(req.params.id);
+  let joke = jokes.find((joke) => joke.id === id);
+  if (joke) {
+    joke.jokeText = req.body.text;
+    joke.jokeType = req.body.type;
+    return res.json(joke);
+  }
+  return res.json({ errorMessage: `There is no resource with such id: ${id}` });
+});
 
 //6. PATCH a joke
+app.patch("/jokes/:id", (req, res) => {
+  let id = Number(req.params.id);
+  let joke = jokes.find((joke) => joke.id === id);
+  if (joke) {
+    if (req.body.text) joke.jokeText = req.body.text;
+    if (req.body.type) joke.jokeType = req.body.type;
+    return res.json(joke);
+  }
 
+  return res.json({ errorMessage: `There is no resource with such id: ${id}` });
+});
 //7. DELETE Specific joke
 
+app.delete("/jokes/:id", (req, res) => {
+  let id = Number(req.params.id);
+  let joke = jokes.find((joke) => joke.id === id);
+
+  if (joke) {
+    let index = jokes.indexOf(joke);
+    jokes.splice(1, index);
+    return res.status(200).send("OK");
+  }
+
+  return res.json({ errorMessage: `There is no resource with such id: ${id}` });
+});
+
 //8. DELETE All jokes
+app.delete("/jokes/all", (req, res) => {
+  jokes.length = 0;
+  return res.status(200).send("OK");
+});
 
 app.listen(port, () => {
   console.log(`Successfully started server on port ${port}.`);

@@ -27,7 +27,7 @@ app.get("/filter", (req, res) => {
     let result = jokes.filter((joke) => joke.jokeType === jokeType);
     return res.json(result);
   }
-  return res.json({ errorMessage: "You didn`t specify the joke type!" });
+  return res.status(400).send( "You didn`t specify the joke type!");
 });
 
 //4. POST a new joke
@@ -51,7 +51,7 @@ app.put("/jokes/:id", (req, res) => {
     joke.jokeType = req.body.type;
     return res.json(joke);
   }
-  return res.json({ errorMessage: `There is no resource with such id: ${id}` });
+  return res.status(400).send(`There is no resource with such id: ${id}`);
 });
 
 //6. PATCH a joke
@@ -64,7 +64,7 @@ app.patch("/jokes/:id", (req, res) => {
     return res.json(joke);
   }
 
-  return res.json({ errorMessage: `There is no resource with such id: ${id}` });
+  return res.status(400).send(`There is no resource with such id: ${id}`);
 });
 //7. DELETE Specific joke
 
@@ -74,17 +74,20 @@ app.delete("/jokes/:id", (req, res) => {
 
   if (joke) {
     let index = jokes.indexOf(joke);
-    jokes.splice(1, index);
+    jokes.splice(index, 1);
     return res.status(200).send("OK");
   }
 
-  return res.json({ errorMessage: `There is no resource with such id: ${id}` });
+  return res.status(400).send(`There is no resource with such id: ${id}`);
 });
 
 //8. DELETE All jokes
-app.delete("/jokes/all", (req, res) => {
-  jokes.length = 0;
-  return res.status(200).send("OK");
+app.delete("/all", (req, res) => {
+  if (req.query.userKey === masterKey) {
+    jokes.length = 0;
+    return res.status(200).send("OK");
+  }
+  return res.status(401).send("You are not allowed to perform such action!")
 });
 
 app.listen(port, () => {
